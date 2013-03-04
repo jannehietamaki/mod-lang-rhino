@@ -33,7 +33,7 @@ function testDeploy() {
 
 function testUndeploy() {
   vertx.deployVerticle("core/deploy/child.js", null, 1, function(id) {
-    tu.checkContext();
+    tu.checkThread();
     eb.registerHandler("test-handler", function MyHandler(message) {
       if ("stopped" === message) {
         eb.unregisterHandler("test-handler", MyHandler);
@@ -42,6 +42,16 @@ function testUndeploy() {
     });
     vertx.undeployVerticle(id);
   });
+}
+
+function testDeployWorker() {
+  eb.registerHandler("test-handler", function MyHandler(message) {
+    if ("started" === message) {
+      eb.unregisterHandler("test-handler", MyHandler);
+      tu.testComplete();
+    }
+  });
+  vertx.deployWorkerVerticle("core/deploy/child.js");
 }
 
 tu.registerTests(this);
